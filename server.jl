@@ -44,4 +44,5 @@ route("/next1") do
         "next1" => Sudoku.next1(convedProblem)
     ]))
 end
+# up(8000, "0.0.0.0", async = false)
 up()
