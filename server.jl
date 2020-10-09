@@ -1,6 +1,9 @@
 # include this file in REPL to start web server
 # reinclude this file to reflect changes
 
+# aws server
+# $ nohup julia -e "using Pkg; Pkg.activate(\".\"); Pkg.instantiate(); Pkg.precompile(); include(\"server.jl\")" &
+
 # routing https://genieframework.github.io/Genie.jl/dev/tutorials/12--Advanced_Routing_Techniques.html#Routing-methods-(GET,-POST,-PUT,-PATCH,-DELETE,-OPTIONS)
 using Genie, Genie.Router, Genie.Requests
 
@@ -10,20 +13,16 @@ using JSON
 route("/hello") do
     "Hello - Welcome to Genie!"
 end
-route("/sudoku/:problem_id") do
+route("/sudoku/:problem_code") do
     # Genie.Requests.payload
-    str_pid = payload(:problem_id)
-    if (!isa(tryparse(Int, str_pid), Int))
-        return JSON.json("invalid index $(str_pid)")
+    pCode = payload(:problem_code)
+    if ( !(pCode in keys(Sudoku.Problems.problems)) )
+        return JSON.json("the index $(pCode) is not in problemList")
     end
-    pid = parse(Int, str_pid)
-    if (!isassigned(Sudoku.Problems.problems, pid))
-        return JSON.json("the index $(pid) is out of bounds")
-    end
-    problem = Sudoku.Problems.get(pid)
+    problem = Sudoku.Problems.get(pCode)
     Sudoku.solve(problem)
     JSON.json(Dict([
-        "problem" => Sudoku.Problems.get(pid),
+        "problem" => Sudoku.Problems.get(pCode),
         "solution" => problem
     ]))
 end
